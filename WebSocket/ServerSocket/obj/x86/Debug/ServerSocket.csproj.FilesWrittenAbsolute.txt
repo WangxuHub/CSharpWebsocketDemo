@@ -1,0 +1,5 @@
+/Users/dolphinX/Projects/WebSocket/ServerSocket/obj/x86/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs
+/Users/dolphinX/Projects/WebSocket/ServerSocket/bin/Debug/ServerSocket.exe.mdb
+/Users/dolphinX/Projects/WebSocket/ServerSocket/bin/Debug/ServerSocket.exe
+/Users/dolphinX/Projects/WebSocket/ServerSocket/obj/x86/Debug/ServerSocket.exe
+/Users/dolphinX/Projects/WebSocket/ServerSocket/obj/x86/Debug/ServerSocket.exe.mdb

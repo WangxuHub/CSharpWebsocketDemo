@@ -1,0 +1,5 @@
+/Users/dolphinX/Projects/WebSocket/ClientSocket/obj/x86/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs
+/Users/dolphinX/Projects/WebSocket/ClientSocket/bin/Debug/ClientSocket.exe.mdb
+/Users/dolphinX/Projects/WebSocket/ClientSocket/bin/Debug/ClientSocket.exe
+/Users/dolphinX/Projects/WebSocket/ClientSocket/obj/x86/Debug/ClientSocket.exe
+/Users/dolphinX/Projects/WebSocket/ClientSocket/obj/x86/Debug/ClientSocket.exe.mdb
