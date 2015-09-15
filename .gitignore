@@ -216,3 +216,5 @@ pip-log.txt
 .mr.developer.cfg
 WebSocket/ServerSocket/bin/Debug/ServerSocket.exe
 WebSocket/ServerSocket/bin/Debug/ServerSocket.exe
+WebSocket/ServerSocket/bin/Debug/ServerSocket.exe
+WebSocket/ServerSocket/obj/x86/Debug/ServerSocket.exe
