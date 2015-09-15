@@ -10,7 +10,7 @@ namespace ServerSocket
 		static void Main(string[] args)
 		{
 			TcpHelper helper = new TcpHelper ();
-			helper.Run (8080);
+			helper.Run (9527);
 		}
 	}
 }

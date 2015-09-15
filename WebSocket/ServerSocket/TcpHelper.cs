@@ -42,12 +42,22 @@ namespace TcpServer
 				while (true) {
 					if (!isClear) {
 						byte[] msg = PackageServerData (msgPool [0]);
-						foreach (KeyValuePair<Socket, ClientInfo> cs in clientPool) {
-							Socket client = cs.Key;
-							if (client.Poll (10, SelectMode.SelectWrite)) {
-								client.Send (msg, msg.Length, SocketFlags.None);
-							}
-						}
+
+
+                        foreach (KeyValuePair<Socket, ClientInfo> cs in clientPool)
+                        {
+                            Socket client = cs.Key;
+                            if (client.Poll(10, SelectMode.SelectWrite))
+                            {
+                                try
+                                {
+                                    client.Send(msg, msg.Length, SocketFlags.None);
+                                }
+                                catch
+                                {
+                                }
+                            }
+                        }
 						msgPool.RemoveAt (0);
 						isClear = msgPool.Count == 0 ? true : false;
 					}
