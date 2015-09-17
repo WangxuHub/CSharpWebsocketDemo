@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 	<title>Web Socket Client</title>
+    <link href="divcss5.css" rel="stylesheet" type="text/css" /> 
 </head>
 <body style="padding:10px;">
 	<h1>Web Socket Chating Room</h1>
 	<div style="margin:5px 0px;">
 		Address:
-		<div><input id="address" type="text" value="ws://127.0.0.1:9527" style="width:400px;"/></div>
+		<div><input id="address" type="text" value="ws://192.168.1.21:9527" style="width:400px;"/></div>
 	</div>
 	<div style="margin:5px 0px;">
 		Name:
@@ -32,32 +34,37 @@
 
 		function connect () {
 			var address=document.getElementById('address').value;
-			
+			///csycdsafs
 			ws=new WebSocket(address);
 			ws.onopen=function(e){
 				var msg=document.createElement('div');
 				msg.style.color='#0f0';
 				msg.innerHTML="Server > connection open.";
 				msgContainer.appendChild(msg);
-				ws.send('{<'+document.getElementById('name').value+'>}');
+				ws.send('{<' + document.getElementById('name').value + '>}');
+				msgContainer.scrollTop = msgContainer.scrollHeight - msgContainer.clientHeight;
 			};
 			ws.onmessage=function(e){
 				var msg=document.createElement('div');
 				msg.style.color='#fff';
 				msg.innerHTML=e.data;
 				msgContainer.appendChild(msg);
+				msgContainer.scrollTop = msgContainer.scrollHeight - msgContainer.clientHeight;
 			};
-			ws.onerror=function(e){
-				var msg=document.createElement('div');
-				msg.style.color='#0f0';
-				msg.innerHTML='Server > '+e.data;
-				msgContainer.appendChild(msg);
+			ws.onerror = function (e) {
+			    var msg = document.createElement('div');
+			    msg.style.color = '#0f0';
+			    msg.innerHTML = 'Server > ' + e.data;
+			    msgContainer.appendChild(msg);
+			    msgContainer.scrollTop = msgContainer.scrollHeight - msgContainer.clientHeight;
 			};
 			ws.onclose=function(e){
 				var msg=document.createElement('div');
 				msg.style.color='#0f0';
 				msg.innerHTML="Server > connection closed by server.";
 				msgContainer.appendChild(msg);
+				msgContainer.scrollTop = msgContainer.scrollHeight - msgContainer.clientHeight;
+
 			};
 			text.focus();
 		}
@@ -69,6 +76,7 @@
 				msg.style.color='#0f0';
 				msg.innerHTML='Server > connection closed.';
 				msgContainer.appendChild(msg);
+				msgContainer.scrollTop = msgContainer.scrollHeight - msgContainer.clientHeight;
 				ws=null;
 			}
 		}
@@ -76,7 +84,7 @@
 		function send(){
 			ws.send(text.value);
 			setTimeout(function(){
-				msgContainer.scrollTop=msgContainer.getBoundingClientRect().height;
+			//	msgContainer.scrollTop=msgContainer.getBoundingClientRect().height;
 			},100);
 			text.value='';
 			text.focus();

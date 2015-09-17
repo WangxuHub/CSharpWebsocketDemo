@@ -23,7 +23,8 @@ namespace TcpServer
 		{
 			Thread serverSocketThraed = new Thread (() => {
 				Socket server = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-				server.Bind (new IPEndPoint (IPAddress.Any, port));
+			//	server.Bind (new IPEndPoint (IPAddress.Any, port));
+                server.Bind(new IPEndPoint(IPAddress.Parse("192.168.1.21"), port));
 				server.Listen (10);
 				server.BeginAccept (new AsyncCallback (Accept), server);
 			});
@@ -43,20 +44,21 @@ namespace TcpServer
 					if (!isClear) {
 						byte[] msg = PackageServerData (msgPool [0]);
 
-
-                        foreach (KeyValuePair<Socket, ClientInfo> cs in clientPool)
+                        try
                         {
-                            Socket client = cs.Key;
-                            if (client.Poll(10, SelectMode.SelectWrite))
+                            foreach (KeyValuePair<Socket, ClientInfo> cs in clientPool)
                             {
-                                try
+                                Socket client = cs.Key;
+                                if (client.Poll(10, SelectMode.SelectWrite))
                                 {
+
                                     client.Send(msg, msg.Length, SocketFlags.None);
-                                }
-                                catch
-                                {
+
                                 }
                             }
+                        }
+                        catch
+                        {
                         }
 						msgPool.RemoveAt (0);
 						isClear = msgPool.Count == 0 ? true : false;
@@ -78,7 +80,7 @@ namespace TcpServer
 			try {
 				//处理下一个客户端连接
 				server.BeginAccept (new AsyncCallback (Accept), server);
-				byte[] buffer = new byte[1024];
+				byte[] buffer = new byte[65536];
 				//接收客户端消息
 				client.BeginReceive (buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback (Recieve), client);
 				ClientInfo info = new ClientInfo ();
@@ -92,6 +94,28 @@ namespace TcpServer
 				Console.WriteLine ("Error :\r\n\t" + ex.ToString ());
 			}
 		}
+
+        private bool IsCloseSocket(Socket client)
+        {
+            if ((clientPool[client].buffer[0] & 0x08) == 0x08)
+            {
+                //把客户端标记为关闭，并在clientPool中清除
+                if (client != null && client.Connected)
+                {
+                    //关闭Socket之前，首选需要把双方的Socket Shutdown掉
+                    client.Shutdown(SocketShutdown.Both);
+                    //Shutdown掉Socket后主线程停止10ms，保证Socket的Shutdown完成
+                    System.Threading.Thread.Sleep(10);
+                    //关闭客户端Socket,清理资源
+                    client.Close();
+
+                    Console.WriteLine("Client {0} disconnet", clientPool[client].Name);
+                    clientPool.Remove(client);
+                }
+                return true;
+            }
+            return false;
+        }
 
 		/// <summary>
 		/// 处理客户端发送的消息，接收成功后加入到msgPool，等待广播
@@ -119,6 +143,7 @@ namespace TcpServer
 					return;
 				}
 
+                if (IsCloseSocket(client)) return;
 				msg = AnalyzeClientData (buffer, length);
 
 				SocketMessage sm = new SocketMessage ();
@@ -142,9 +167,18 @@ namespace TcpServer
 
 			} catch {
 				//把客户端标记为关闭，并在clientPool中清除
-				client.Disconnect (true);
-				Console.WriteLine ("Client {0} disconnet", clientPool [client].Name);
-				clientPool.Remove (client);
+                if(client!=null&&client.Connected)
+                {
+                    //关闭Socket之前，首选需要把双方的Socket Shutdown掉
+                    client.Shutdown(SocketShutdown.Both);
+                    //Shutdown掉Socket后主线程停止10ms，保证Socket的Shutdown完成
+                    System.Threading.Thread.Sleep(10);
+                    //关闭客户端Socket,清理资源
+                    client.Close();
+
+				    Console.WriteLine ("Client {0} disconnet", clientPool [client].Name);
+			     	clientPool.Remove (client);
+                }
 			}
 		}
 
@@ -256,16 +290,29 @@ namespace TcpServer
 			byte[] temp = Encoding.UTF8.GetBytes (msg.ToString ());
 
 			if (temp.Length < 126) {
-				content = new byte[temp.Length + 2];
+				content = new byte[temp.Length + 6];
 				content [0] = 0x81;
-				content [1] = (byte)temp.Length;
+				content [1] = (byte)(temp.Length); //已经加上掩码
+
+               // content[1] = (byte)(0x80 + temp.Length); //已经加上掩码
+                //byte[] masks = new byte[] { 01, 01, 01, 01 };
+                ////加上掩码
+                //for (var i = 0; i < temp.Length; i++)
+                //{
+                //    temp[i] = (byte)(temp[i] ^ masks[i % 4]);
+                //}
+
+                //Array.Copy(masks, 0, content, 2, 4);
+             //   Array.Copy(temp, 0, content, 6, temp.Length);
 				Array.Copy (temp, 0, content, 2, temp.Length);
 			} else if (temp.Length < 0xFFFF) {
 				content = new byte[temp.Length + 4];
 				content [0] = 0x81;
 				content [1] = 126;
-				content [2] = (byte)(temp.Length & 0xFF);
-				content [3] = (byte)(temp.Length >> 8 & 0xFF);
+
+                content[3] = (byte)(temp.Length & 0xFF);
+                content[2] = (byte)(temp.Length >> 8 & 0xFF);
+
 				Array.Copy (temp, 0, content, 4, temp.Length);
 			} else {
 				// 暂不处理超长内容  
